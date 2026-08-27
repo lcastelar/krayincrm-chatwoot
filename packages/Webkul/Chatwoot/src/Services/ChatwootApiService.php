@@ -209,6 +209,23 @@ class ChatwootApiService
     }
 
     /**
+     * Get labels assigned to a specific contact in Chatwoot.
+     */
+    public function getContactLabels(int $contactId): array
+    {
+        try {
+            $response = $this->client()->get("{$this->baseUrl}/api/v1/accounts/{$this->accountId}/contacts/{$contactId}/labels");
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['payload'] ?? $data ?? [];
+            }
+        } catch (\Throwable $e) {
+            Log::error("ChatwootApiService getContactLabels failed: " . $e->getMessage());
+        }
+        return [];
+    }
+
+    /**
      * Update contact labels (tags) in Chatwoot.
      */
     public function updateContactLabels(int $contactId, array $labels): bool

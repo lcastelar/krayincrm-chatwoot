@@ -84,10 +84,21 @@ class ChatwootWebhookController extends Controller
     protected function syncContact(array $payload): string
     {
         $contactData = $payload['contact'] ?? $payload;
+        $chatwootContactId = $contactData['id'] ?? null;
         $name = $contactData['name'] ?? null;
         $email = $contactData['email'] ?? null;
         $phone = $contactData['phone_number'] ?? null;
         $tags = $contactData['tags'] ?? $contactData['labels'] ?? [];
+
+        // Chatwoot webhooks do not embed contact labels in the contact_updated payload body.
+        // Query the Chatwoot API directly to retrieve the exact real-time assigned tags!
+        if ($chatwootContactId) {
+            $apiService = app(ChatwootApiService::class);
+            $fetchedTags = $apiService->getContactLabels((int) $chatwootContactId);
+            if (! empty($fetchedTags)) {
+                $tags = $fetchedTags;
+            }
+        }
 
         if (! $email && ! $phone && ! $name) {
             return 'Contato sem identificador (e-mail/telefone/nome vazio)';
