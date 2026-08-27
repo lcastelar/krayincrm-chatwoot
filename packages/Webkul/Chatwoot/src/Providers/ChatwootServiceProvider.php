@@ -31,6 +31,18 @@ class ChatwootServiceProvider extends ServiceProvider
         // Register Observers for Real-Time Krayin -> Chatwoot Synchronization
         Person::observe(PersonObserver::class);
         Tag::observe(TagObserver::class);
+
+        // Register Console Commands & Automated Scheduled Sync
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Webkul\Chatwoot\Console\Commands\SyncTagsCommand::class,
+            ]);
+        }
+
+        $this->app->booted(function () {
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('chatwoot:sync-tags')->everyFifteenMinutes();
+        });
     }
 
     /**
