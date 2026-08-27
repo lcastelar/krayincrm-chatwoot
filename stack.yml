@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   krayin_app:
-    # Substitua pelo seu repositório no GitHub Container Registry
-    image: ghcr.io/SEU_USUARIO/krayin-crm:latest
+    image: ghcr.io/lcastelar/krayincrm-chatwoot:latest
     environment:
       APP_NAME: "Krayin CRM"
       APP_ENV: production
