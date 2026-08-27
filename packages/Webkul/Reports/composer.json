@@ -1,0 +1,25 @@
+{
+    "name": "webkul/reports",
+    "description": "Advanced Analytics and Reports Module for Krayin CRM",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krayin CRM Community",
+            "email": "community@example.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Reports\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Reports\\Providers\\ReportsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

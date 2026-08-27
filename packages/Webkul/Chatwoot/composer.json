@@ -1,0 +1,30 @@
+{
+    "name": "webkul/chatwoot",
+    "description": "Chatwoot Dashboard App & Webhook Integration Module for Krayin CRM",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krayin Chatwoot Team",
+            "email": "support@example.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Chatwoot\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Chatwoot\\Providers\\ChatwootServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,0 +1,7 @@
+.git
+.github
+*.tar
+*.tar.gz
+*.zip
+stack.yml
+README.md

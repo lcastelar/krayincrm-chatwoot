@@ -1,0 +1,11 @@
+# Git Ignore
+.git/
+.env
+.env.*
+vendor/
+node_modules/
+*.tar
+*.tar.gz
+*.zip
+.DS_Store
+Thumbs.db
