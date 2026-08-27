@@ -165,14 +165,8 @@
                             </button>
                         </div>
 
-                        <div class="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">Marque no Chatwoot:</span>
-                            <span class="inline-flex items-center rounded bg-blue-50 px-2 py-0.5 font-medium text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800 text-[10px]">
-                                Contato criado (contact_created)
-                            </span>
-                            <span class="inline-flex items-center rounded bg-blue-50 px-2 py-0.5 font-medium text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800 text-[10px]">
-                                Contato atualizado (contact_updated)
-                            </span>
+                        <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                            <b>Eventos a marcar:</b> Contato criado (<code>contact_created</code>) e Contato atualizado (<code>contact_updated</code>).
                         </div>
                     </div>
 
