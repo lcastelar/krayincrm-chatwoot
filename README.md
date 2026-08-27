@@ -148,13 +148,11 @@ networks:
 ### 1. Configurar Webhook de Sincronização
 1. No Chatwoot, vá em **Configurações ➔ Webhooks ➔ Adicionar novo webhook**.
 2. **URL do Webhook**: `https://crm.seu-dominio.com/api/chatwoot/webhook`
-3. **Eventos inscritos**:
-   - `contact_created`
-   - `contact_updated`
-   - `contact_deleted`
-   - `label_created`
-   - `label_updated`
-   - `label_deleted`
+3. **Eventos a marcar**:
+   - ☑️ `Contato criado (contact_created)`
+   - ☑️ `Contato atualizado (contact_updated)` (inclui sincronização em tempo real de tags nos contatos)
+   - ☑️ `Conversa Criada (conversation_created)` (opcional)
+   - ☑️ `Conversa Atualizada (conversation_updated)` (opcional)
 4. Salve para ativar a sincronização instantânea.
 
 ### 2. Configurar Dashboard App (Barra Lateral)

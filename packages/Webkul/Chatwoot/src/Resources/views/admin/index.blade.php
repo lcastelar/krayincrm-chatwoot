@@ -165,7 +165,7 @@
                             </button>
                         </div>
                         <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                            <b>Eventos recomendados:</b> contact_created, contact_updated, contact_deleted, label_created, label_updated, label_deleted.
+                            <b>Eventos a marcar:</b> Contato criado (<code>contact_created</code>) e Contato atualizado (<code>contact_updated</code>).
                         </div>
                     </div>
 
