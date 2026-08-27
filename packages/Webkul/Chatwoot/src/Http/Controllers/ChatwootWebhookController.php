@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Webkul\Chatwoot\Services\ChatwootApiService;
 use Webkul\Chatwoot\Services\SyncContext;
 use Webkul\Contact\Repositories\PersonRepository;
 use Webkul\Tag\Models\Tag;
