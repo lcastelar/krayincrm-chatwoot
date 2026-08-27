@@ -1,30 +1,68 @@
-# Krayin CRM - Chatwoot Integration & Advanced Analytics Add-ons
+# Krayin CRM - Integração Bidirecional Chatwoot & Relatórios Avançados
 
 [![Build and Publish Docker Image](https://github.com/lcastelar/krayincrm-chatwoot/actions/workflows/docker-build.yml/badge.svg)](https://github.com/lcastelar/krayincrm-chatwoot/actions/workflows/docker-build.yml)
 [![Docker Image](https://img.shields.io/badge/Addon%20Image-ghcr.io%2Flcastelar%2Fkrayincrm--chatwoot-blue?logo=docker)](https://github.com/lcastelar/krayincrm-chatwoot/pkgs/container/krayincrm-chatwoot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Este repositório contém os módulos e add-ons oficiais para o **[Krayin CRM](https://krayincrm.com)**:
-- 💬 **`Webkul\Chatwoot`**: Dashboard App para atendentes no Chatwoot e sincronização bidirecional via Webhooks.
-- 📊 **`Webkul\Reports`**: Painel avançado de Relatórios & Inteligência de Vendas (Visão Geral, Vendas & Receita, Funil Cônico, Desempenho por Tags e Produtividade da Equipe).
+Este repositório contém add-ons modulares de produção para o **[Krayin CRM](https://krayincrm.com)** com imagem oficial (`webkul/krayin:latest`):
+
+- 💬 **`Webkul\Chatwoot`**: 
+  - **Sincronização Bidirecional em Tempo Real** de Contatos (criação, edição e exclusão segura).
+  - **Sincronização Bidirecional do Catálogo de Tags** (nomes, cores hexadecimais e exclusão sincronizada).
+  - **Painel Administrativo no Menu Lateral** (`/admin/chatwoot/settings`) exclusivo para administradores com teste de conexão (Ping), sincronizador em massa e log de auditoria em tempo real.
+  - **Dashboard App para Atendentes** (`/chatwoot/embed`) integrado à barra lateral do Chatwoot.
+- 📊 **`Webkul\Reports`**:
+  - Painel executivo de inteligência comercial (Visão Geral, Vendas & Receita, Funil Cônico com destaques para Ganho/Perdido, Desempenho por Tags e Produtividade por Atendente).
 
 ---
 
-## 🏗️ Arquitetura dos Add-ons
-
-Este repositório fornece uma imagem instaladora leve (`ghcr.io/lcastelar/krayincrm-chatwoot:latest`) que injeta os módulos diretamente na imagem oficial **`webkul/krayin:latest`** através de um volume compartilhado.
+## 🏗️ Arquitetura dos Módulos
 
 ```mermaid
-flowchart LR
-    A[ghcr.io/lcastelar/krayincrm-chatwoot<br>Installer de Add-ons] -->|Copia módulos| V[(Volume Compartilhado<br>krayin_modules)]
-    B[webkul/krayin:latest<br>Krayin CRM Oficial] -->|Monta packages/Webkul| V
+flowchart TD
+    subgraph Chatwoot [Chatwoot Platform]
+        C_Contacts[Contatos / Clientes]
+        C_Tags[Catálogo de Etiquetas]
+        C_Embed[Dashboard App Atendimento]
+    end
+
+    subgraph Krayin [Krayin CRM]
+        K_Contacts[Pessoas / Contatos]
+        K_Tags[Catálogo de Tags]
+        K_Admin[Painel Admin /admin/chatwoot/settings]
+        K_Logs[(chatwoot_webhook_logs)]
+    end
+
+    C_Contacts -->|Webhook Real-Time| K_Contacts
+    K_Contacts -->|Observer API Real-Time| C_Contacts
+    C_Tags <-->|Sincronização Bilateral| K_Tags
+    K_Embed -->|Embed Iframe| C_Embed
+    K_Contacts -.->|Auditoria| K_Logs
 ```
 
 ---
 
-## 🚀 Como Usar no Portainer / Docker Compose
+## ⚡ Recursos Principais da Integração
 
-Adicione os serviços abaixo na sua stack do Portainer / Docker Compose. A aplicação principal roda com a imagem oficial do Krayin (`webkul/krayin:latest`) e os add-ons são carregados automaticamente:
+### 1. Sincronização Bidirecional de Contatos
+- **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.
+- **Krayin ➔ Chatwoot**: Model Observer monitora alterações no Krayin e dispara chamadas à API do Chatwoot.
+- **Prevenção de Loops**: Mecanismo `SyncContext::executeWithoutLoop()` impede re-disparos infinitos entre os dois sistemas.
+- **Exclusão Segura**: Ao excluir um contato, os Negócios/Leads vinculados no Krayin são preservados com desvinculação (`person_id = null`), mantendo o faturamento e as métricas do funil intactos.
+
+### 2. Sincronização do Catálogo Global de Tags
+- O catálogo de tags do Krayin espelha com fidelidade as etiquetas ativas do Chatwoot (incluindo cores hexadecimais).
+- Qualquer tag criada, editada ou removida em um sistema é refletida no outro.
+
+### 3. Painel Administrativo Exclusivo (`/admin/chatwoot/settings`)
+- Visível apenas para administradores via controle de acesso (ACL).
+- **Testador de Ping**: Validação imediata de conectividade com a API do Chatwoot.
+- **Sincronização sob Demanda**: Botão para alinhamento instantâneo do catálogo de tags e purga de tags obsoletas.
+- **Log de Auditoria**: Tabela detalhada com as últimas requisições recebidas, status HTTP (200, 401, 500) e payloads.
+
+---
+
+## 🚀 Como Usar no Portainer / Docker Swarm
 
 ```yaml
 version: "3.7"
@@ -49,6 +87,9 @@ services:
 
     volumes:
       - krayin_modules:/var/www/laravel-crm/packages/Webkul
+      - /opt/krayin-AppServiceProvider.php:/var/www/laravel-crm/app/Providers/AppServiceProvider.php:ro
+      - /opt/krayin-bootstrap-app.php:/var/www/laravel-crm/bootstrap/app.php:ro
+      - /opt/krayin-nginx.conf:/etc/nginx/conf.d/krayin.conf:ro
 
     networks:
       - traefik_public
@@ -68,17 +109,15 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: SUA_SENHA_DO_BANCO
 
-      # Cache e Sessão com Redis
-      REDIS_HOST: krayin_redis
-      REDIS_PORT: 6379
-      CACHE_STORE: redis
-      SESSION_DRIVER: redis
-      QUEUE_CONNECTION: redis
+      # Cache e Sessão
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
 
-      # Integração com Chatwoot
+      # Integração Chatwoot
       CHATWOOT_URL: https://chat.seu-dominio.com
-      CHATWOOT_API_TOKEN: SEU_CHATWOOT_API_TOKEN
+      CHATWOOT_API_TOKEN: SEU_CHATWOOT_API_ACCESS_TOKEN
       CHATWOOT_ACCOUNT_ID: 1
+      CHATWOOT_WEBHOOK_SECRET: SEU_WEBHOOK_SECRET_OPCIONAL
 
     deploy:
       replicas: 1
@@ -90,34 +129,6 @@ services:
         - "traefik.http.routers.krayin.entrypoints=websecure"
         - "traefik.http.routers.krayin.tls.certresolver=letsencrypt"
         - "traefik.http.services.krayin.loadbalancer.server.port=80"
-
-  ## --------------------------- BANCO DE DADOS (PERCONA MYSQL) --------------------------- ##
-
-  krayin_db:
-    image: percona/percona-server:8.0
-    command: --default-authentication-plugin=mysql_native_password --sql-mode=""
-    environment:
-      MYSQL_ROOT_PASSWORD: SUA_SENHA_DO_BANCO
-      MYSQL_DATABASE: krayincrm
-    volumes:
-      - krayin_db_data:/var/lib/mysql
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
-    networks:
-      - internal
-
-  ## --------------------------- REDIS CACHE & QUEUE --------------------------- ##
-
-  krayin_redis:
-    image: redis:alpine
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
-    networks:
-      - internal
 
 volumes:
   krayin_modules:
@@ -134,54 +145,23 @@ networks:
 
 ## ⚙️ Configuração no Chatwoot
 
-### 1. Configurar o Dashboard App (Barra Lateral de Atendimento)
-1. No Chatwoot, vá em **Configurações ➔ Aplicativos do Painel (Dashboard Apps) ➔ Adicionar novo aplicativo**.
-2. Preencha os campos:
-   - **Nome**: `Krayin CRM`
-   - **URL do Painel**: `https://crm.seu-dominio.com/chatwoot/embed`
-3. Salve. Ao abrir qualquer conversa no Chatwoot, a barra lateral direita exibirá os dados do lead no Krayin CRM.
-
-### 2. Configurar o Webhook de Sincronização
+### 1. Configurar Webhook de Sincronização
 1. No Chatwoot, vá em **Configurações ➔ Webhooks ➔ Adicionar novo webhook**.
-2. Preencha:
-   - **URL do Webhook**: `https://crm.seu-dominio.com/api/chatwoot/webhook`
-   - **Eventos inscritos**: `contact_created`, `contact_updated`, `conversation_created`, `conversation_updated`.
-3. Salve para ativar a sincronização em tempo real.
+2. **URL do Webhook**: `https://crm.seu-dominio.com/api/chatwoot/webhook`
+3. **Eventos inscritos**:
+   - `contact_created`
+   - `contact_updated`
+   - `contact_deleted`
+   - `label_created`
+   - `label_updated`
+   - `label_deleted`
+4. Salve para ativar a sincronização instantânea.
 
----
-
-## 🛠️ Instalação Manual em um Krayin Existente
-
-Se preferir copiar os arquivos diretamente para uma instalação local do Krayin:
-
-1. Copie as pastas para o diretório `packages/Webkul/`:
-   - `packages/Webkul/Chatwoot`
-   - `packages/Webkul/Reports`
-
-2. No `composer.json` do Krayin, adicione no bloco `autoload.psr-4`:
-   ```json
-   "autoload": {
-       "psr-4": {
-           "Webkul\\Chatwoot\\": "packages/Webkul/Chatwoot/src/",
-           "Webkul\\Reports\\": "packages/Webkul/Reports/src/"
-       }
-   }
-   ```
-
-3. No `bootstrap/providers.php`, registre os Service Providers:
-   ```php
-   return [
-       // Outros providers...
-       Webkul\Chatwoot\Providers\ChatwootServiceProvider::class,
-       Webkul\Reports\Providers\ReportsServiceProvider::class,
-   ];
-   ```
-
-4. Execute no terminal:
-   ```bash
-   composer dump-autoload --optimize
-   php artisan optimize:clear
-   ```
+### 2. Configurar Dashboard App (Barra Lateral)
+1. No Chatwoot, vá em **Configurações ➔ Aplicativos do Painel ➔ Adicionar novo aplicativo**.
+2. **Nome**: `Krayin CRM`
+3. **URL do Painel**: `https://crm.seu-dominio.com/chatwoot/embed`
+4. Salve.
 
 ---
 

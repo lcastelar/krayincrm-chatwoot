@@ -3,6 +3,11 @@
 namespace Webkul\Chatwoot\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Webkul\Chatwoot\Observers\PersonObserver;
+use Webkul\Chatwoot\Observers\TagObserver;
+use Webkul\Chatwoot\Services\ChatwootApiService;
+use Webkul\Contact\Models\Person;
+use Webkul\Tag\Models\Tag;
 
 class ChatwootServiceProvider extends ServiceProvider
 {
@@ -22,6 +27,10 @@ class ChatwootServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../Config/chatwoot.php' => config_path('chatwoot.php'),
         ], 'chatwoot-config');
+
+        // Register Observers for Real-Time Krayin -> Chatwoot Synchronization
+        Person::observe(PersonObserver::class);
+        Tag::observe(TagObserver::class);
     }
 
     /**
@@ -32,5 +41,17 @@ class ChatwootServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__ . '/../Config/chatwoot.php', 'chatwoot'
         );
+
+        $this->mergeConfigFrom(
+            __DIR__ . '/../Config/menu.php', 'menu.admin'
+        );
+
+        $this->mergeConfigFrom(
+            __DIR__ . '/../Config/acl.php', 'acl'
+        );
+
+        $this->app->singleton(ChatwootApiService::class, function () {
+            return new ChatwootApiService();
+        });
     }
 }
