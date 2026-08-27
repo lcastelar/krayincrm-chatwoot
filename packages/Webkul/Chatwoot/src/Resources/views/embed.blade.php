@@ -484,6 +484,21 @@
 
     <!-- Main Widget Container -->
     <div id="main-widget-container">
+        @if ($currentUser ?? false)
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 6px 10px; background: #f8fafc; border-radius: 6px; font-size: 11.5px; color: #64748b; border: 1px solid #e2e8f0;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 13px;">👤</span>
+                    <span>Operando como: <strong style="color: #0f172a;">{{ $currentUser->name }}</strong> ({{ $currentUser->email }})</span>
+                </div>
+                <a href="{{ route('admin.session.destroy') }}" onclick="event.preventDefault(); document.getElementById('logout-form-embed').submit();" style="color: #ef4444; text-decoration: none; font-size: 11px; font-weight: 500;">
+                    Sair
+                </a>
+                <form id="logout-form-embed" action="{{ route('admin.session.destroy') }}" method="POST" class="hidden">
+                    @csrf
+                </form>
+            </div>
+        @endif
+
         <!-- State Loading -->
         <div id="state-loading" class="loading-spinner">
             ⌛ Carregando dados do CRM...

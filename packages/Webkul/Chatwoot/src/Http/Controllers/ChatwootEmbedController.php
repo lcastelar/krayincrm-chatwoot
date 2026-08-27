@@ -33,8 +33,11 @@ class ChatwootEmbedController extends Controller
             return response()->view('chatwoot::unauthorized', [], 401);
         }
 
+        $currentUser = auth()->guard('user')->user();
+
         return view('chatwoot::embed', [
-            'token' => $token,
+            'token'       => $token,
+            'currentUser' => $currentUser,
         ]);
     }
 
@@ -173,13 +176,15 @@ class ChatwootEmbedController extends Controller
         try {
             $personId = $request->input('person_id');
 
+            $authUserId = auth()->guard('user')->id() ?? config('chatwoot.default_user_id', 1);
+
             if (! $personId) {
                 $personData = [
                     'name' => $request->input('name') ?: 'Novo Contato',
                     'emails' => $request->input('email') ? [['value' => $request->input('email'), 'label' => 'work']] : [],
                     'contact_numbers' => $request->input('phone') ? [['value' => $request->input('phone'), 'label' => 'work']] : [],
                     'entity_type' => 'persons',
-                    'user_id' => config('chatwoot.default_user_id', 1),
+                    'user_id' => $authUserId,
                 ];
 
                 $person = $this->personRepository->create($personData);
@@ -194,7 +199,7 @@ class ChatwootEmbedController extends Controller
                 'lead_pipeline_stage_id' => $request->input('stage_id'),
                 'lead_source_id' => 5, // Direto
                 'lead_type_id' => 1,   // Novo Negócio
-                'user_id' => config('chatwoot.default_user_id', 1),
+                'user_id' => $authUserId,
                 'entity_type' => 'leads',
             ];
 
@@ -275,13 +280,15 @@ class ChatwootEmbedController extends Controller
         ]);
 
         try {
+            $authUserId = auth()->guard('user')->id() ?? config('chatwoot.default_user_id', 1);
+
             $activity = $this->activityRepository->create([
                 'type' => 'note',
                 'title' => 'Nota via Chatwoot',
                 'comment' => $request->input('comment'),
                 'lead_id' => $request->input('lead_id'),
                 'is_done' => 1,
-                'user_id' => config('chatwoot.default_user_id', 1),
+                'user_id' => $authUserId,
             ]);
 
             return response()->json([

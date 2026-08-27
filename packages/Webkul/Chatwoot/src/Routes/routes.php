@@ -16,9 +16,9 @@ Route::group(['middleware' => ['web', 'user'], 'prefix' => 'admin/chatwoot'], fu
 });
 
 /**
- * Chatwoot Dashboard App Embed Routes
+ * Chatwoot Dashboard App Embed Routes (Requires logged in Krayin user)
  */
-Route::group(['middleware' => ['web']], function () {
+Route::group(['middleware' => ['web', 'user']], function () {
     Route::get('/chatwoot/embed', [ChatwootEmbedController::class, 'index'])->name('chatwoot.embed.index');
     Route::post('/chatwoot/embed/search', [ChatwootEmbedController::class, 'search'])->name('chatwoot.embed.search');
     Route::post('/chatwoot/embed/lead/store', [ChatwootEmbedController::class, 'storeLead'])->name('chatwoot.embed.lead.store');
