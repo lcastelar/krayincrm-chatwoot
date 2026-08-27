@@ -43,7 +43,7 @@
         <div id="status-alert" class="hidden rounded-lg p-3 text-xs font-medium transition-all"></div>
 
         {{-- KPI Cards Grid --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
             {{-- Status de Conexão --}}
             <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -110,7 +110,7 @@
         </div>
 
         {{-- Configuration Endpoints & Guides --}}
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
             {{-- Webhook Guide --}}
             <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center gap-2 font-semibold text-gray-800 dark:text-white">
