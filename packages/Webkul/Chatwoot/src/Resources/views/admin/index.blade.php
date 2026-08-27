@@ -42,10 +42,10 @@
         {{-- Status Notification Alert --}}
         <div id="status-alert" class="hidden rounded-lg p-3 text-xs font-medium transition-all"></div>
 
-        {{-- KPI Cards Grid --}}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        {{-- KPI Cards Grid (4 columns side-by-side) --}}
+        <div style="display: flex; flex-direction: row; gap: 1rem; width: 100%;">
             {{-- Status de Conexão --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">STATUS DA API</span>
                     @if ($ping['success'] ?? false)
@@ -67,7 +67,7 @@
             </div>
 
             {{-- Total de Tags Ativas --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">CATÁLOGO DE TAGS</span>
                     <span class="icon-tag text-gray-400"></span>
@@ -81,7 +81,7 @@
             </div>
 
             {{-- Contatos com Tags --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">CONTATOS CADASTRADOS</span>
                     <span class="icon-user text-gray-400"></span>
@@ -95,7 +95,7 @@
             </div>
 
             {{-- Eventos Webhook Recebidos --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">EVENTOS WEBHOOK</span>
                     <span class="icon-activity text-gray-400"></span>
@@ -109,10 +109,10 @@
             </div>
         </div>
 
-        {{-- Configuration Endpoints & Guides --}}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+        {{-- Configuration Endpoints & Guides (2 columns side-by-side) --}}
+        <div style="display: flex; flex-direction: row; gap: 1rem; width: 100%;">
             {{-- Webhook Guide --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center gap-2 font-semibold text-gray-800 dark:text-white">
                     <span class="icon-settings text-primary"></span>
                     <span>Webhook de Sincronização em Tempo Real</span>
@@ -142,7 +142,7 @@
             </div>
 
             {{-- Dashboard App Guide --}}
-            <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div style="flex: 1 1 0; min-width: 0;" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center gap-2 font-semibold text-gray-800 dark:text-white">
                     <span class="icon-dashboard text-primary"></span>
                     <span>Dashboard App (Barra Lateral do Chatwoot)</span>
