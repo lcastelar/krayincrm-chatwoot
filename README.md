@@ -1,14 +1,11 @@
-# Krayin CRM - Integração Bidirecional Chatwoot & Relatórios Avançados
+# Krayin CRM — Integração com Chatwoot e Relatórios
 
-[![Build and Publish Docker Image](https://github.com/lcastelar/krayincrm-chatwoot/actions/workflows/docker-build.yml/badge.svg)](https://github.com/lcastelar/krayincrm-chatwoot/actions/workflows/docker-build.yml)
-[![Docker Image](https://img.shields.io/badge/Addon%20Image-ghcr.io%2Flcastelar%2Fkrayincrm--chatwoot-blue?logo=docker)](https://github.com/lcastelar/krayincrm-chatwoot/pkgs/container/krayincrm-chatwoot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 Este repositório contém add-ons modulares de produção para o **[Krayin CRM](https://krayincrm.com)** com imagem oficial (`webkul/krayin:latest`):
 
 - 💬 **`Webkul\Chatwoot`**: 
-  - **Sincronização Bidirecional em Tempo Real** de Contatos (criação, edição e exclusão segura).
-  - **Sincronização Bidirecional do Catálogo de Tags** (nomes, cores hexadecimais e exclusão sincronizada).
+  - Integração de contatos e tags com o Chatwoot.
   - **Painel Administrativo no Menu Lateral** (`/admin/chatwoot/settings`) exclusivo para administradores com teste de conexão (Ping), sincronizador em massa e log de auditoria em tempo real.
   - **Dashboard App para Atendentes** (`/chatwoot/embed`) integrado à barra lateral do Chatwoot.
 - 📊 **`Webkul\Reports`**:
@@ -42,17 +39,32 @@ flowchart TD
 
 ---
 
-## ⚡ Recursos Principais da Integração
+## ⚡ Evolução em especificação
 
-### 1. Sincronização Bidirecional de Contatos
+O próximo ciclo, documentado no backlog Specsfy, estabelecerá o Chatwoot como
+fonte de verdade para contatos e tags. A sincronização ocorrerá do Chatwoot
+para o Krayin por webhooks e sincronização inicial confirmada por administrador.
+O ciclo também prevê auditoria paginada, controles administrativos, suporte a
+iframe com a sessão existente do Krayin e documentação white-label.
+Ele não cria leads automaticamente; leads permanecem sob criação manual ou
+por automações que utilizem a API do Krayin.
+
+## 🧭 Desenvolvimento orientado por especificações
+
+Este projeto utiliza Specsfy para registrar ideias, refiná-las em backlog e
+transformá-las em especificações, testes e implementação rastreáveis. Ao final
+de cada sprint, o próximo comando recomendado e uma mensagem de commit são
+documentados no handoff.
+
+## ⚡ Recursos atuais da integração
+
+### 1. Sincronização de Contatos
 - **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.
-- **Krayin ➔ Chatwoot**: Model Observer monitora alterações no Krayin e dispara chamadas à API do Chatwoot.
-- **Prevenção de Loops**: Mecanismo `SyncContext::executeWithoutLoop()` impede re-disparos infinitos entre os dois sistemas.
 - **Exclusão Segura**: Ao excluir um contato, os Negócios/Leads vinculados no Krayin são preservados com desvinculação (`person_id = null`), mantendo o faturamento e as métricas do funil intactos.
 
-### 2. Sincronização do Catálogo Global de Tags
+### 2. Catálogo Global de Tags
 - O catálogo de tags do Krayin espelha com fidelidade as etiquetas ativas do Chatwoot (incluindo cores hexadecimais).
-- Qualquer tag criada, editada ou removida em um sistema é refletida no outro.
+- O comportamento de sincronização de tags é definido e evoluído pelo backlog Specsfy deste projeto.
 
 ### 3. Painel Administrativo Exclusivo (`/admin/chatwoot/settings`)
 - Visível apenas para administradores via controle de acesso (ACL).

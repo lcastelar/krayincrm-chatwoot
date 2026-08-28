@@ -15,4 +15,6 @@ Confirme os manifests e as fronteiras principais antes de completar o modelo gen
 
 ## Operação
 
+- Ao concluir cada sprint, informar explicitamente o comando Specsfy recomendado para o próximo passo e, quando houver alterações versionáveis, sugerir uma mensagem de commit.
+
 ## Regras específicas do projeto
