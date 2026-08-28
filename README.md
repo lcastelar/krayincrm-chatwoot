@@ -56,7 +56,30 @@ transformá-las em especificações, testes e implementação rastreáveis. Ao f
 de cada sprint, o próximo comando recomendado e uma mensagem de commit são
 documentados no handoff.
 
+Os addons são organizados como pacotes Laravel independentes em
+`packages/Webkul/Chatwoot` e `packages/Webkul/Reports`.
+
 ## ⚡ Recursos atuais da integração
+
+### API para automações (n8n)
+
+Autentique cada chamada com `Authorization: Bearer <token>`. Os exemplos usam
+domínios e dados fictícios.
+
+```http
+GET https://crm.example.test/api/v1/contacts/persons?search=telefone-ou-email
+Authorization: Bearer <token>
+```
+
+O retorno de contatos inclui `id`, `name`, `emails`, `contact_numbers`,
+`job_title`, `user_id`, `organization_id`, `created_at` e `updated_at`.
+
+```http
+GET https://crm.example.test/api/v1/leads?person_id=<krayin_person_id>
+Authorization: Bearer <token>
+```
+
+O segundo endpoint retorna somente os negócios vinculados ao contato informado.
 
 ### 1. Sincronização de Contatos
 - **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.

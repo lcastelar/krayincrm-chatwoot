@@ -62,7 +62,7 @@ class ChatwootApiController extends Controller
         $payload = $this->getPayload($request);
         $search = $payload['search'] ?? $payload['phone'] ?? $payload['email'] ?? null;
 
-        $query = Person::query();
+        $query = Person::query()->with('attribute_values');
 
         if ($search) {
             $cleanSearch = preg_replace('/\D/', '', (string) $search);
@@ -79,7 +79,17 @@ class ChatwootApiController extends Controller
 
         $persons = $query->limit(50)->get();
 
-        return response()->json(['data' => $persons]);
+        return response()->json(['data' => $persons->map(fn (Person $person) => [
+            'id'              => $person->id,
+            'name'            => $person->getAttribute('name'),
+            'emails'          => $person->getAttribute('emails'),
+            'contact_numbers' => $person->getAttribute('contact_numbers'),
+            'job_title'       => $person->getAttribute('job_title'),
+            'user_id'         => $person->user_id,
+            'organization_id' => $person->organization_id,
+            'created_at'      => $person->created_at,
+            'updated_at'      => $person->updated_at,
+        ])->values()]);
     }
 
     /**
