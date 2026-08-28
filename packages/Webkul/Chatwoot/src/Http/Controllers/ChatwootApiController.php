@@ -7,10 +7,11 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Webkul\Activity\Repositories\ActivityRepository;
+use Webkul\Contact\Models\Person;
 use Webkul\Contact\Repositories\PersonRepository;
+use Webkul\Lead\Models\Lead;
 use Webkul\Lead\Repositories\LeadRepository;
-use Webkul\Lead\Repositories\PipelineRepository;
-use Webkul\Lead\Repositories\StageRepository;
+use Webkul\Product\Models\Product;
 use Webkul\Product\Repositories\ProductRepository;
 
 class ChatwootApiController extends Controller
@@ -18,8 +19,6 @@ class ChatwootApiController extends Controller
     public function __construct(
         protected PersonRepository $personRepository,
         protected LeadRepository $leadRepository,
-        protected PipelineRepository $pipelineRepository,
-        protected StageRepository $stageRepository,
         protected ActivityRepository $activityRepository,
         protected ProductRepository $productRepository
     ) {}
@@ -38,6 +37,21 @@ class ChatwootApiController extends Controller
     }
 
     /**
+     * Extrai dados mesclando input, json e array de payload.
+     */
+    protected function getPayload(Request $request): array
+    {
+        $content = $request->getContent();
+        $json = json_decode($content, true);
+
+        if (is_array($json)) {
+            return array_merge($request->all(), $json);
+        }
+
+        return $request->all();
+    }
+
+    /**
      * GET /api/v1/contacts/persons ou GET /api/admin/contacts/persons
      * Busca pessoas/contatos no CRM por telefone, e-mail ou nome.
      */
@@ -45,23 +59,25 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $search = $request->input('search') ?: $request->input('phone') ?: $request->input('email');
+        $payload = $this->getPayload($request);
+        $search = $payload['search'] ?? $payload['phone'] ?? $payload['email'] ?? null;
 
-        if (! $search) {
-            $persons = $this->personRepository->all();
-            return response()->json(['data' => $persons]);
+        $query = Person::query();
+
+        if ($search) {
+            $cleanSearch = preg_replace('/\D/', '', (string) $search);
+            $query->where(function ($q) use ($search, $cleanSearch) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('emails', 'like', "%{$search}%")
+                  ->orWhere('contact_numbers', 'like', "%{$search}%");
+
+                if (! empty($cleanSearch)) {
+                    $q->orWhere('contact_numbers', 'like', "%{$cleanSearch}%");
+                }
+            });
         }
 
-        $cleanSearch = preg_replace('/\D/', '', $search);
-
-        $persons = $this->personRepository->scopeQuery(function ($query) use ($search, $cleanSearch) {
-            return $query->where('name', 'like', "%{$search}%")
-                ->orWhere('emails', 'like', "%{$search}%")
-                ->orWhere('contact_numbers', 'like', "%{$search}%")
-                ->when(! empty($cleanSearch), function ($q) use ($cleanSearch) {
-                    return $q->orWhere('contact_numbers', 'like', "%{$cleanSearch}%");
-                });
-        })->get();
+        $persons = $query->limit(50)->get();
 
         return response()->json(['data' => $persons]);
     }
@@ -74,23 +90,24 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $personId = $request->input('person_id');
-        $search = $request->input('search');
+        $payload = $this->getPayload($request);
+        $personId = $payload['person_id'] ?? null;
+        $search = $payload['search'] ?? null;
 
-        $query = $this->leadRepository->scopeQuery(function ($q) use ($personId, $search) {
-            if ($personId) {
-                $q->where('person_id', $personId);
-            }
-            if ($search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            }
-            return $q->orderBy('id', 'desc');
-        });
+        $query = Lead::query();
 
-        $leads = $query->get();
+        if ($personId) {
+            $query->where('person_id', $personId);
+        }
+
+        if ($search) {
+            $query->where(function ($sub) use ($search) {
+                $sub->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $leads = $query->orderBy('id', 'desc')->limit(50)->get();
 
         return response()->json(['data' => $leads]);
     }
@@ -103,33 +120,38 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'person_id' => 'required|integer',
-            'lead_pipeline_id' => 'nullable|integer',
-            'lead_pipeline_stage_id' => 'nullable|integer',
-        ]);
+        $payload = $this->getPayload($request);
+
+        $title = $payload['title'] ?? null;
+        $personId = $payload['person_id'] ?? null;
+
+        if (empty($title) || empty($personId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campos obrigatórios ausentes: title e person_id são necessários.',
+            ], 422);
+        }
 
         try {
             $defaultUserId = config('chatwoot.default_user_id', 1);
-            $userId = $request->input('user_id', $defaultUserId);
+            $userId = $payload['user_id'] ?? $defaultUserId;
 
-            $pipelineId = $request->input('lead_pipeline_id', config('chatwoot.default_pipeline_id', 2));
-            $stageId = $request->input('lead_pipeline_stage_id', config('chatwoot.default_stage_id', 5));
-            $status = $request->input('status', 'won');
+            $pipelineId = $payload['lead_pipeline_id'] ?? config('chatwoot.default_pipeline_id', 2);
+            $stageId = $payload['lead_pipeline_stage_id'] ?? config('chatwoot.default_stage_id', 11);
+            $status = $payload['status'] ?? 'won';
 
             $leadData = [
-                'title' => $request->input('title'),
-                'description' => $request->input('description', ''),
-                'lead_value' => $request->input('lead_value', 0),
-                'status' => $status,
-                'person_id' => $request->input('person_id'),
-                'lead_pipeline_id' => $pipelineId,
-                'lead_pipeline_stage_id' => $stageId,
-                'lead_source_id' => $request->input('lead_source_id', 5), // Direto
-                'lead_type_id' => $request->input('lead_type_id', 1),     // Novo Negócio
-                'user_id' => $userId,
-                'entity_type' => 'leads',
+                'title'                  => $title,
+                'description'            => $payload['description'] ?? '',
+                'lead_value'             => $payload['lead_value'] ?? 0,
+                'status'                 => $status,
+                'person_id'              => (int) $personId,
+                'lead_pipeline_id'       => (int) $pipelineId,
+                'lead_pipeline_stage_id' => (int) $stageId,
+                'lead_source_id'         => $payload['lead_source_id'] ?? 5, // Direto
+                'lead_type_id'           => $payload['lead_type_id'] ?? 1,   // Novo Negócio
+                'user_id'                => (int) $userId,
+                'entity_type'            => 'leads',
             ];
 
             $lead = $this->leadRepository->create($leadData);
@@ -137,8 +159,8 @@ class ChatwootApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lead criado com sucesso no Krayin CRM!',
-                'data' => $lead,
-                'id' => $lead->id,
+                'data'    => $lead,
+                'id'      => $lead->id,
             ], 201);
         } catch (\Throwable $e) {
             Log::error('ChatwootApiController@createLead error: ' . $e->getMessage());
@@ -146,6 +168,7 @@ class ChatwootApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao criar Lead: ' . $e->getMessage(),
+                'trace'   => $e->getFile() . ':' . $e->getLine(),
             ], 500);
         }
     }
@@ -158,35 +181,37 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
+        $payload = $this->getPayload($request);
+
         try {
             $updateData = ['entity_type' => 'leads'];
 
-            if ($request->has('title')) {
-                $updateData['title'] = $request->input('title');
+            if (isset($payload['title'])) {
+                $updateData['title'] = $payload['title'];
             }
-            if ($request->has('description')) {
-                $updateData['description'] = $request->input('description');
+            if (isset($payload['description'])) {
+                $updateData['description'] = $payload['description'];
             }
-            if ($request->has('lead_value')) {
-                $updateData['lead_value'] = $request->input('lead_value');
+            if (isset($payload['lead_value'])) {
+                $updateData['lead_value'] = $payload['lead_value'];
             }
-            if ($request->has('status')) {
-                $updateData['status'] = $request->input('status');
+            if (isset($payload['status'])) {
+                $updateData['status'] = $payload['status'];
             }
-            if ($request->has('lead_pipeline_id')) {
-                $updateData['lead_pipeline_id'] = $request->input('lead_pipeline_id');
+            if (isset($payload['lead_pipeline_id'])) {
+                $updateData['lead_pipeline_id'] = (int) $payload['lead_pipeline_id'];
             }
-            if ($request->has('lead_pipeline_stage_id')) {
-                $updateData['lead_pipeline_stage_id'] = $request->input('lead_pipeline_stage_id');
+            if (isset($payload['lead_pipeline_stage_id'])) {
+                $updateData['lead_pipeline_stage_id'] = (int) $payload['lead_pipeline_stage_id'];
             }
 
-            $lead = $this->leadRepository->update($updateData, $id);
+            $lead = $this->leadRepository->update($updateData, (int) $id);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Lead atualizado com sucesso!',
-                'data' => $lead,
-                'id' => $lead->id,
+                'data'    => $lead,
+                'id'      => $lead->id,
             ]);
         } catch (\Throwable $e) {
             Log::error('ChatwootApiController@updateLead error: ' . $e->getMessage());
@@ -206,18 +231,20 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $search = $request->input('search') ?: $request->input('query');
+        $payload = $this->getPayload($request);
+        $search = $payload['search'] ?? $payload['query'] ?? null;
 
-        if (! $search) {
-            $products = $this->productRepository->all();
-            return response()->json(['data' => $products]);
+        $query = Product::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
-        $products = $this->productRepository->scopeQuery(function ($q) use ($search) {
-            return $q->where('name', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
-        })->get();
+        $products = $query->limit(50)->get();
 
         return response()->json(['data' => $products]);
     }
@@ -230,38 +257,41 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $request->validate([
-            'product_id' => 'required|integer',
-            'quantity' => 'nullable|numeric',
-            'price' => 'nullable|numeric',
-        ]);
+        $payload = $this->getPayload($request);
+        $productId = $payload['product_id'] ?? null;
+
+        if (empty($productId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campo obrigatório ausente: product_id é necessário.',
+            ], 422);
+        }
 
         try {
-            $productId = $request->input('product_id');
-            $quantity = $request->input('quantity', 1);
-            $price = $request->input('price', 0);
+            $quantity = $payload['quantity'] ?? 1;
+            $price = $payload['price'] ?? 0;
             $amount = $quantity * $price;
 
             // Insere ou atualiza na tabela lead_products
             DB::table('lead_products')->updateOrInsert(
                 [
-                    'lead_id' => $id,
-                    'product_id' => $productId,
+                    'lead_id'    => (int) $id,
+                    'product_id' => (int) $productId,
                 ],
                 [
-                    'quantity' => $quantity,
-                    'price' => $price,
-                    'amount' => $amount,
+                    'quantity'   => $quantity,
+                    'price'      => $price,
+                    'amount'     => $amount,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Produto vinculado com sucesso ao Lead!',
-                'lead_id' => $id,
-                'product_id' => $productId,
+                'success'    => true,
+                'message'    => 'Produto vinculado com sucesso ao Lead!',
+                'lead_id'    => (int) $id,
+                'product_id' => (int) $productId,
             ]);
         } catch (\Throwable $e) {
             Log::error('ChatwootApiController@addLeadProduct error: ' . $e->getMessage());
@@ -281,37 +311,42 @@ class ChatwootApiController extends Controller
     {
         $this->authenticate($request);
 
-        $request->validate([
-            'lead_id' => 'required|integer',
-            'comment' => 'required|string',
-        ]);
+        $payload = $this->getPayload($request);
+        $leadId = $payload['lead_id'] ?? null;
+        $comment = $payload['comment'] ?? null;
+
+        if (empty($leadId) || empty($comment)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campos obrigatórios ausentes: lead_id e comment são necessários.',
+            ], 422);
+        }
 
         try {
             $defaultUserId = config('chatwoot.default_user_id', 1);
-            $userId = $request->input('user_id', $defaultUserId);
-            $type = $request->input('type', 'note');
-            $title = $request->input('title', 'Nota Técnica');
-            $leadId = $request->input('lead_id');
+            $userId = $payload['user_id'] ?? $defaultUserId;
+            $type = $payload['type'] ?? 'note';
+            $title = $payload['title'] ?? 'Nota Técnica';
 
             $activity = $this->activityRepository->create([
-                'type' => $type,
-                'title' => $title,
-                'comment' => $request->input('comment'),
-                'is_done' => $request->input('is_done', 1),
-                'user_id' => $userId,
+                'type'    => $type,
+                'title'   => $title,
+                'comment' => $comment,
+                'is_done' => $payload['is_done'] ?? 1,
+                'user_id' => (int) $userId,
             ]);
 
             // Vincula a atividade ao Lead na tabela pivot lead_activities
             DB::table('lead_activities')->updateOrInsert([
-                'lead_id' => $leadId,
-                'activity_id' => $activity->id,
+                'lead_id'     => (int) $leadId,
+                'activity_id' => (int) $activity->id,
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Atividade / Nota Técnica criada com sucesso!',
-                'data' => $activity,
-                'id' => $activity->id,
+                'data'    => $activity,
+                'id'      => $activity->id,
             ], 201);
         } catch (\Throwable $e) {
             Log::error('ChatwootApiController@createActivity error: ' . $e->getMessage());

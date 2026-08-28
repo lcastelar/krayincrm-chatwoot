@@ -36,28 +36,28 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api'], function () {
 
 /**
  * Krayin CRM Integration REST API Routes (Used by n8n and External Automations)
- * Support both /api/v1/... and /api/admin/... prefixes.
+ * Support both /api/v1/... and /api/admin/... prefixes with unique route names.
  */
-foreach (['api/v1', 'api/admin'] as $prefix) {
-    Route::group(['middleware' => ['api'], 'prefix' => $prefix], function () {
+foreach (['api/v1' => 'v1', 'api/admin' => 'admin'] as $prefix => $tag) {
+    Route::group(['middleware' => ['api'], 'prefix' => $prefix], function () use ($tag) {
         // Persons / Contacts
-        Route::get('/contacts/persons', [ChatwootApiController::class, 'searchPersons'])->name('api.contacts.persons.search');
-        Route::get('/persons/search', [ChatwootApiController::class, 'searchPersons'])->name('api.persons.search');
+        Route::get('/contacts/persons', [ChatwootApiController::class, 'searchPersons'])->name("api.{$tag}.contacts.persons.search");
+        Route::get('/persons/search', [ChatwootApiController::class, 'searchPersons'])->name("api.{$tag}.persons.search");
 
         // Leads / Deals
-        Route::get('/leads', [ChatwootApiController::class, 'getLeads'])->name('api.leads.index');
-        Route::post('/leads', [ChatwootApiController::class, 'createLead'])->name('api.leads.store');
-        Route::put('/leads/{id}', [ChatwootApiController::class, 'updateLead'])->name('api.leads.update');
-        Route::post('/leads/{id}', [ChatwootApiController::class, 'updateLead'])->name('api.leads.update_post');
+        Route::get('/leads', [ChatwootApiController::class, 'getLeads'])->name("api.{$tag}.leads.index");
+        Route::post('/leads', [ChatwootApiController::class, 'createLead'])->name("api.{$tag}.leads.store");
+        Route::put('/leads/{id}', [ChatwootApiController::class, 'updateLead'])->name("api.{$tag}.leads.update");
+        Route::post('/leads/{id}', [ChatwootApiController::class, 'updateLead'])->name("api.{$tag}.leads.update_post");
 
         // Products
-        Route::get('/products', [ChatwootApiController::class, 'searchProducts'])->name('api.products.search');
-        Route::put('/leads/product/{id}', [ChatwootApiController::class, 'addLeadProduct'])->name('api.leads.product.attach');
-        Route::post('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name('api.leads.products.attach_post');
-        Route::put('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name('api.leads.products.attach_put');
+        Route::get('/products', [ChatwootApiController::class, 'searchProducts'])->name("api.{$tag}.products.search");
+        Route::put('/leads/product/{id}', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.product.attach");
+        Route::post('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.products.attach_post");
+        Route::put('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.products.attach_put");
 
         // Activities / Notes
-        Route::post('/activities', [ChatwootApiController::class, 'createActivity'])->name('api.activities.store');
-        Route::post('/leads/{id}/notes', [ChatwootApiController::class, 'createActivity'])->name('api.leads.notes.store');
+        Route::post('/activities', [ChatwootApiController::class, 'createActivity'])->name("api.{$tag}.activities.store");
+        Route::post('/leads/{id}/notes', [ChatwootApiController::class, 'createActivity'])->name("api.{$tag}.leads.notes.store");
     });
 }
