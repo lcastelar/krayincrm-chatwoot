@@ -15,6 +15,7 @@ Relação: relaciona cada arquivo observado à sua superfície.
 | Outras fontes | packages/Webkul/Chatwoot/src/Console/Commands/SyncTagsCommand.php | SyncTagsCommand, handle |
 | Outras fontes | packages/Webkul/Chatwoot/src/Database/Migrations/2026_08_27_000001_create_chatwoot_webhook_logs_table.php | extends, up, down |
 | Outras fontes | packages/Webkul/Chatwoot/src/Http/Controllers/ChatwootAdminController.php | ChatwootAdminController, __construct, index, ping, syncTagsNow, clearLogs |
+| Outras fontes | packages/Webkul/Chatwoot/src/Http/Controllers/ChatwootApiController.php | ChatwootApiController, __construct, authenticate, getPayload, searchPersons, getLeads, createLead, updateLead |
 | Outras fontes | packages/Webkul/Chatwoot/src/Http/Controllers/ChatwootEmbedController.php | ChatwootEmbedController, __construct, index, search, storeLead, updateStage, storeActivity |
 | Outras fontes | packages/Webkul/Chatwoot/src/Http/Controllers/ChatwootWebhookController.php | ChatwootWebhookController, __construct, handle, syncContact, syncPersonTags, deleteContact, syncTagCreated, syncTagUpdated |
 | Outras fontes | packages/Webkul/Chatwoot/src/Observers/PersonObserver.php | PersonObserver, __construct, created, updated, deleted |
