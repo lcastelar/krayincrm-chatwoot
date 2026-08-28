@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "skills": {
+    "specsfy-01-inbox": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "726f0533a6692f0228f1ea3bee5f18c556a303e8f03839df5f7935646887b8c4"
+    },
+    "specsfy-02-backlog": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "304caa30a6429925971c259d3c8bb21fb77c2f75a42e17cc5687820d76e764b8"
+    },
+    "specsfy-03-specify": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "5d355ded6e4ad6db5dad536818bde2852ab2e9173b613a3ac59ad77135b33523"
+    },
+    "specsfy-04-validate": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "d89aa62971c3f488df930d2ba5e30f38f855fb969c2392db6929744913843433"
+    },
+    "specsfy-05-tasks": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "a6ef75a053f22b999951e5e816310f78fa56f91624051a860d74875f8b1079e2"
+    },
+    "specsfy-06-tdd-bdd": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "810ce6e96c8c5dbea706a1804f814ebc74a0447dce43369851e95535c2dca580"
+    },
+    "specsfy-07-implement": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "69ba6f87e686bda2cf7ec1d9b54a65a02efa0e58bb0cf8962e2bfdf0fd3840ad"
+    },
+    "specsfy-aux-database": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "c2a8f4120af41426d4865f4b477677508917f26265f12cc239901d2985143f5c"
+    },
+    "specsfy-aux-rules": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "b30f6091ccabe703a150b5a46c043797bf446866c612596254ac68565e60fee7"
+    },
+    "specsfy-aux-stack": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "753c2a3c9e43f87b8b64fccf44958afa1efe3fa026aae8750aa2c019aefd1c8f"
+    },
+    "specsfy-data-discovery": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "1899712a8ef25e7db6851d23494d0fa4b42cf223fe5b52f983b29e06e25267c4"
+    },
+    "specsfy-documentator": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "e23eba60ff3527fd42823c7f647d6ebd4a8ba9601f0d228a9350c851c15e251b"
+    },
+    "specsfy-interviewer": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "2c1cf41b32563ba6640b60244bed97487970cee1677393ab6a2c9384a1ae487c"
+    },
+    "specsfy-milestone-governor": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "5cffd8ce8e8d510d80f8801a31bf32294b013190a1180592c4d30ece14306d04"
+    },
+    "specsfy-mvp-milestone-interviewer": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "f824eec6e5b150f63df0c41a15ae9cc017e8c77f6ca4e7ec110d67573b0e5a19"
+    },
+    "specsfy-progress": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "2bb41d3237eb6c896b0065d8f86c6d9c64f741e4e3836afe84a956fcf1de210d"
+    },
+    "specsfy-roadmap-milestone-interviewer": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "9ce7c06cec3e8a9a56d82616f5b7a519cfafea77fb658091e62dfc879856af1b"
+    },
+    "specsfy-setup": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "dd877f386c78398847dff29adff35d613f8999af89d1aeb5c9037f0da88d9e37"
+    },
+    "specsfy-update-spec": {
+      "source": "../../../../../../AppData/Local/Temp/specsfy-source-091c5e426b804abaa161de439ead4cd2/checkout/skills",
+      "sourceType": "local",
+      "computedHash": "eae831177c2ef514ab978bb8dcbe2e03b28449273f2d27fbf480bb2bb129099b"
+    }
+  }
+}
