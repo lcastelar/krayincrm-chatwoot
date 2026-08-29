@@ -68,7 +68,9 @@ domínios e dados fictícios.
 
 Para chamadas do addon à API do Chatwoot, configure `CHATWOOT_API_TOKEN`.
 `KRAYIN_API_TOKEN` continua destinado à autenticação das APIs expostas pelo
-addon e não é usado para autenticar chamadas ao Chatwoot.
+addon e não é usado para autenticar chamadas ao Chatwoot. Use
+`Authorization: Bearer <token>` com o valor de `KRAYIN_API_TOKEN` nas APIs do
+addon.
 
 ```http
 GET https://crm.example.test/api/v1/contacts/persons?search=telefone-ou-email

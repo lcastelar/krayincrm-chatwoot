@@ -22,5 +22,6 @@ class ChatwootConfigTest extends TestCase
         $config = require dirname(__DIR__, 2).'/src/Config/chatwoot.php';
 
         self::assertSame('chatwoot-token-fixture', $config['api_token']);
+        self::assertSame('krayin-token-fixture', $config['krayin_api_token']);
     }
 }

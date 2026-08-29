@@ -29,7 +29,7 @@ class ChatwootApiController extends Controller
     protected function authenticate(Request $request): void
     {
         $token = $request->bearerToken() ?: $request->header('X-API-Key') ?: $request->query('api_token');
-        $expected = config('chatwoot.api_token') ?: env('KRAYIN_API_TOKEN') ?: env('CHATWOOT_API_TOKEN') ?: env('CHATWOOT_EMBED_SECRET');
+        $expected = config('chatwoot.krayin_api_token') ?: env('KRAYIN_API_TOKEN');
 
         if (! empty($expected) && $token !== $expected) {
             abort(response()->json(['error' => 'Unauthorized: Invalid or missing API token'], 401));
