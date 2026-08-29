@@ -254,9 +254,18 @@ class ChatwootApiController extends Controller
             });
         }
 
-        $products = $query->limit(50)->get();
+        $products = $query->with('attribute_values')->limit(50)->get();
 
-        return response()->json(['data' => $products]);
+        return response()->json(['data' => $products->map(fn (Product $product) => [
+            'id'          => $product->id,
+            'name'        => $product->getAttribute('name'),
+            'sku'         => $product->getAttribute('sku'),
+            'description' => $product->getAttribute('description'),
+            'quantity'    => $product->getAttribute('quantity'),
+            'price'       => $product->getAttribute('price'),
+            'created_at'  => $product->created_at,
+            'updated_at'  => $product->updated_at,
+        ])->values()]);
     }
 
     /**

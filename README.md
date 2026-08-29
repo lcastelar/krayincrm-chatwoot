@@ -81,6 +81,14 @@ Authorization: Bearer <token>
 
 O segundo endpoint retorna somente os negócios vinculados ao contato informado.
 
+```http
+GET https://crm.example.test/api/v1/products?search=nome-ou-sku
+Authorization: Bearer <token>
+```
+
+O retorno de produtos inclui `id`, `name`, `sku`, `description`, `quantity`,
+`price`, `created_at` e `updated_at`.
+
 ### 1. Sincronização de Contatos
 - **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.
 - **Exclusão Segura**: Ao excluir um contato, os Negócios/Leads vinculados no Krayin são preservados com desvinculação (`person_id = null`), mantendo o faturamento e as métricas do funil intactos.
