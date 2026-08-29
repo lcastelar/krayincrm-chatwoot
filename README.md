@@ -192,6 +192,29 @@ networks:
 
 ---
 
+### Encaminhamento do token Bearer pelo Nginx
+
+Quando o Krayin estiver atrás de Nginx com PHP-FPM, inclua a diretiva abaixo
+no bloco `location ~ \\.php$`, após `include fastcgi_params;`:
+
+```nginx
+fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+```
+
+Sem essa diretiva, o PHP não recebe o cabeçalho `Authorization` e as rotas da
+API retornam `401` mesmo quando o cliente envia um token Bearer válido.
+
+Se esse arquivo Nginx for montado individualmente como bind mount no Docker
+Swarm, uma edição que substitua o arquivo pode preservar a versão anterior no
+container em execução. Após validar a sintaxe do Nginx, recrie somente o
+serviço da aplicação para remontá-lo:
+
+```bash
+docker service update --force <stack>_krayin_app
+```
+
+---
+
 ## ⚙️ Configuração no Chatwoot
 
 ### 1. Configurar Webhook de Sincronização
