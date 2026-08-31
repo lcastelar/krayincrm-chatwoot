@@ -190,19 +190,8 @@ class ChatwootWebhookController extends Controller
             ]);
         }
 
-        // 3. Sincronizar nos leads abertos vinculados a essa pessoa
-        $leadIds = DB::table('leads')->where('person_id', $personId)->pluck('id')->toArray();
-        if (! empty($leadIds)) {
-            DB::table('lead_tags')->whereIn('lead_id', $leadIds)->delete();
-            foreach ($leadIds as $leadId) {
-                foreach ($tagIds as $tagId) {
-                    DB::table('lead_tags')->insert([
-                        'lead_id' => $leadId,
-                        'tag_id'  => $tagId,
-                    ]);
-                }
-            }
-        }
+        // Tags from Chatwoot belong only to the CRM person. They must not be
+        // copied to leads, which have their own independent tag relation.
     }
 
     /**
@@ -305,9 +294,8 @@ class ChatwootWebhookController extends Controller
         $tag = DB::table('tags')->where('name', $title)->first();
         if ($tag) {
             DB::table('person_tags')->where('tag_id', $tag->id)->delete();
-            DB::table('lead_tags')->where('tag_id', $tag->id)->delete();
             DB::table('tags')->where('id', $tag->id)->delete();
-            return "Etiqueta '{$title}' removida do Krayin e desvinculada de contatos/leads";
+            return "Etiqueta '{$title}' removida do Krayin e desvinculada de contatos";
         }
 
         return "Etiqueta '{$title}' não encontrada para exclusão";

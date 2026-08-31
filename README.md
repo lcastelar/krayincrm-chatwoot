@@ -101,6 +101,7 @@ O retorno de produtos inclui `id`, `name`, `sku`, `description`, `quantity`,
 
 ### 2. Catálogo Global de Tags
 - O catálogo de tags do Krayin espelha com fidelidade as etiquetas ativas do Chatwoot (incluindo cores hexadecimais).
+- Etiquetas recebidas do Chatwoot são associadas somente a pessoas/contatos; nunca são copiadas para negócios/leads.
 - O comportamento de sincronização de tags é definido e evoluído pelo backlog Specsfy deste projeto.
 
 ### 3. Painel Administrativo Exclusivo (`/admin/chatwoot/settings`)
