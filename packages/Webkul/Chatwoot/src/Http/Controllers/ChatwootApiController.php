@@ -13,6 +13,7 @@ use Webkul\Lead\Models\Lead;
 use Webkul\Lead\Repositories\LeadRepository;
 use Webkul\Product\Models\Product;
 use Webkul\Product\Repositories\ProductRepository;
+use Webkul\Chatwoot\Services\LeadValueSynchronizer;
 
 class ChatwootApiController extends Controller
 {
@@ -20,7 +21,8 @@ class ChatwootApiController extends Controller
         protected PersonRepository $personRepository,
         protected LeadRepository $leadRepository,
         protected ActivityRepository $activityRepository,
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected LeadValueSynchronizer $leadValueSynchronizer
     ) {}
 
     /**
@@ -291,26 +293,31 @@ class ChatwootApiController extends Controller
             $price = $payload['price'] ?? 0;
             $amount = $quantity * $price;
 
-            // Insere ou atualiza na tabela lead_products
-            DB::table('lead_products')->updateOrInsert(
-                [
-                    'lead_id'    => (int) $id,
-                    'product_id' => (int) $productId,
-                ],
-                [
-                    'quantity'   => $quantity,
-                    'price'      => $price,
-                    'amount'     => $amount,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            $leadValue = DB::transaction(function () use ($id, $productId, $quantity, $price, $amount) {
+                // Insere ou atualiza na tabela lead_products.
+                DB::table('lead_products')->updateOrInsert(
+                    [
+                        'lead_id'    => (int) $id,
+                        'product_id' => (int) $productId,
+                    ],
+                    [
+                        'quantity'   => $quantity,
+                        'price'      => $price,
+                        'amount'     => $amount,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+
+                return $this->recalculateLeadValue((int) $id);
+            });
 
             return response()->json([
                 'success'    => true,
                 'message'    => 'Produto vinculado com sucesso ao Lead!',
                 'lead_id'    => (int) $id,
                 'product_id' => (int) $productId,
+                'lead_value' => $leadValue,
             ]);
         } catch (\Throwable $e) {
             Log::error('ChatwootApiController@addLeadProduct error: ' . $e->getMessage());
@@ -320,6 +327,14 @@ class ChatwootApiController extends Controller
                 'message' => 'Erro ao vincular produto: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Recalculate and return the opportunity value from linked products.
+     */
+    private function recalculateLeadValue(int $leadId): float
+    {
+        return $this->leadValueSynchronizer->recalculate($leadId);
     }
 
     /**

@@ -95,6 +95,18 @@ Authorization: Bearer <token>
 O retorno de produtos inclui `id`, `name`, `sku`, `description`, `quantity`,
 `price`, `created_at` e `updated_at`.
 
+Ao vincular ou atualizar um produto em um negócio por API, a resposta também
+inclui `lead_value`. O valor da oportunidade é sempre a soma dos campos
+`amount` dos produtos vinculados. A mesma regra é aplicada às alterações e
+remoções feitas pela interface do Krayin.
+
+Após atualizar o addon, execute as migrations do Krayin para instalar os
+gatilhos de sincronização:
+
+```bash
+php artisan migrate --force
+```
+
 ### 1. Sincronização de Contatos
 - **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.
 - **Exclusão Segura**: Ao excluir um contato, os Negócios/Leads vinculados no Krayin são preservados com desvinculação (`person_id = null`), mantendo o faturamento e as métricas do funil intactos.
