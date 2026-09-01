@@ -111,6 +111,13 @@ php artisan migrate --force
 - **Chatwoot ➔ Krayin**: Webhook escuta `contact_created`, `contact_updated` e `contact_deleted`.
 - **Exclusão Segura**: Ao excluir um contato, os Negócios/Leads vinculados no Krayin são preservados com desvinculação (`person_id = null`), mantendo o faturamento e as métricas do funil intactos.
 
+### Criação de negócios pelo Dashboard App
+
+Para um contato existente, o formulário sugere o título editável
+`Negócio com <nome do contato>` e apresenta as origens cadastradas no Krayin.
+A origem selecionada é gravada no negócio; o addon não usa um ID de origem
+fixo.
+
 ### 2. Catálogo Global de Tags
 - O catálogo de tags do Krayin espelha com fidelidade as etiquetas ativas do Chatwoot (incluindo cores hexadecimais).
 - Etiquetas recebidas do Chatwoot são associadas somente a pessoas/contatos; nunca são copiadas para negócios/leads.

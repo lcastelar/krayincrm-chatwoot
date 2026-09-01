@@ -4,6 +4,7 @@ namespace Webkul\Chatwoot\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Webkul\Contact\Repositories\PersonRepository;
 use Webkul\Lead\Repositories\LeadRepository;
@@ -78,12 +79,14 @@ class ChatwootEmbedController extends Controller
                 ]),
             ];
         });
+        $sources = DB::table('lead_sources')->orderBy('name')->get(['id', 'name']);
 
         if (! $person) {
             return response()->json([
                 'found' => false,
                 'chatwoot_contact' => $chatwootContact,
                 'pipelines' => $allPipelines,
+                'sources' => $sources,
             ]);
         }
 
@@ -154,6 +157,7 @@ class ChatwootEmbedController extends Controller
             ],
             'leads' => $formattedLeads,
             'pipelines' => $allPipelines,
+            'sources' => $sources,
         ]);
     }
 
@@ -166,6 +170,7 @@ class ChatwootEmbedController extends Controller
             'title' => 'required|string|max:255',
             'pipeline_id' => 'required|integer',
             'stage_id' => 'required|integer',
+            'lead_source_id' => 'required|integer|exists:lead_sources,id',
             'lead_value' => 'nullable|numeric',
             'person_id' => 'nullable|integer',
             'name' => 'nullable|string|max:255',
@@ -197,7 +202,7 @@ class ChatwootEmbedController extends Controller
                 'person_id' => $personId,
                 'lead_pipeline_id' => $request->input('pipeline_id'),
                 'lead_pipeline_stage_id' => $request->input('stage_id'),
-                'lead_source_id' => 5, // Direto
+                'lead_source_id' => $request->input('lead_source_id'),
                 'lead_type_id' => 1,   // Novo Negócio
                 'user_id' => $authUserId,
                 'entity_type' => 'leads',

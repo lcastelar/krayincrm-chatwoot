@@ -554,6 +554,10 @@
                     <input type="number" id="new-lead-value" class="form-control" placeholder="0.00">
                 </div>
                 <div class="form-group">
+                    <label>Origem *</label>
+                    <select id="new-lead-source" class="form-control"></select>
+                </div>
+                <div class="form-group">
                     <label>Funil / Pipeline</label>
                     <select id="new-lead-pipeline" class="form-control" onchange="updateNewLeadStages()"></select>
                 </div>
@@ -680,7 +684,7 @@
 
             const p = data.person;
             document.getElementById('contact-full-name').innerText = p.name || 'Contato';
-            document.getElementById('account-title').innerText = "D'Mar Electronics";
+            document.getElementById('account-title').innerText = '{{ config('app.name', 'Krayin CRM') }}';
 
             const phoneVal = (p.contact_numbers && p.contact_numbers[0]) ? p.contact_numbers[0].value : (currentContact.phone_number || '');
             const emailVal = (p.emails && p.emails[0]) ? p.emails[0].value : (currentContact.email || '');
@@ -718,6 +722,7 @@
 
             renderDealsList(data.leads);
             populatePipelines('new-lead-pipeline', 'new-lead-stage', data.pipelines);
+            populateSources(data.sources);
         }
 
         function renderDealsList(leads) {
@@ -850,7 +855,21 @@
         }
 
         function toggleNewLeadForm() {
-            document.getElementById('form-new-lead').classList.toggle('hidden');
+            const form = document.getElementById('form-new-lead');
+            const willOpen = form.classList.contains('hidden');
+            form.classList.toggle('hidden');
+
+            if (willOpen) {
+                const personName = globalData?.person?.name || 'contato';
+                document.getElementById('new-lead-title').value = `Negócio com ${personName}`;
+            }
+        }
+
+        function populateSources(sources) {
+            const sourceEl = document.getElementById('new-lead-source');
+            sourceEl.innerHTML = (sources || []).map(source =>
+                `<option value="${source.id}">${escapeHtml(source.name)}</option>`
+            ).join('');
         }
 
         function populatePipelines(pipelineElId, stageElId, pipelines) {
@@ -889,6 +908,7 @@
                 lead_value: document.getElementById('new-lead-value').value || 0,
                 pipeline_id: document.getElementById('new-lead-pipeline').value,
                 stage_id: document.getElementById('new-lead-stage').value,
+                lead_source_id: document.getElementById('new-lead-source').value,
             };
 
             fetch('/chatwoot/embed/lead/store', {
