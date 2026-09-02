@@ -30,10 +30,17 @@ $request = static function (string $method, string $uri, array $payload = [], ?s
 
     if ($token !== null) {
         $server['HTTP_AUTHORIZATION'] = 'Bearer '.$token;
+    } else {
+        // Request::create merges the process environment; explicitly remove any inherited header.
+        $server['HTTP_AUTHORIZATION'] = '';
     }
 
     $httpRequest = Request::create($uri, $method, [], [], [], $server, json_encode($payload, JSON_THROW_ON_ERROR));
     $httpRequest->headers->set('Content-Type', 'application/json');
+
+    if ($token === null) {
+        $httpRequest->headers->remove('Authorization');
+    }
 
     return $kernel->handle($httpRequest);
 };
@@ -53,7 +60,7 @@ $skuAdmin = 'regression-admin-'.$suffix;
 DB::beginTransaction();
 
 try {
-    $assertStatus($request('POST', '/api/v1/products', ['name' => 'Sem autenticação', 'sku' => $skuV1]), 401, 'autenticação ausente');
+    $assertStatus($request('POST', '/api/v1/products', ['name' => 'Sem autenticação', 'sku' => $skuV1], null), 401, 'autenticação ausente');
     $assertStatus($request('POST', '/api/v1/products', ['name' => 'Token inválido', 'sku' => $skuV1], 'invalid-test-token'), 401, 'autenticação inválida');
 
     $created = $assertStatus($request('POST', '/api/v1/products', [

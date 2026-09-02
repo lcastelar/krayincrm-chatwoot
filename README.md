@@ -71,7 +71,8 @@ Para chamadas do addon à API do Chatwoot, configure `CHATWOOT_API_TOKEN`.
 addon e não é usado para autenticar chamadas ao Chatwoot. Use
 `Authorization: Bearer <token>` com o valor de `KRAYIN_API_TOKEN` nas APIs do
 addon. Se esse token não estiver configurado, as rotas permanecem bloqueadas
-com HTTP `401`.
+com HTTP `401`. Os testes de regressão também cobrem chamadas sem credencial e
+com credencial inválida.
 
 ```http
 GET https://crm.example.test/api/v1/contacts/persons?search=telefone-ou-email
