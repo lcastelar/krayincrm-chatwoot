@@ -95,6 +95,38 @@ Authorization: Bearer <token>
 O retorno de produtos inclui `id`, `name`, `sku`, `description`, `quantity`,
 `price`, `created_at` e `updated_at`.
 
+O catálogo também pode ser criado e atualizado pelas automações. As mesmas
+rotas estão disponíveis sob o prefixo compatível `/api/admin`.
+
+```http
+POST https://crm.example.test/api/v1/products
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Produto de exemplo",
+  "sku": "produto-exemplo",
+  "description": "Descrição opcional",
+  "quantity": 10,
+  "price": 99.90,
+  "entity_type": "products"
+}
+```
+
+```http
+PUT https://crm.example.test/api/v1/products/123
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Produto de exemplo atualizado",
+  "sku": "produto-exemplo",
+  "quantity": 8,
+  "price": 109.90,
+  "entity_type": "products"
+}
+```
+
 Ao vincular ou atualizar um produto em um negócio por API, a resposta também
 inclui `lead_value`. O valor da oportunidade é sempre a soma dos campos
 `amount` dos produtos vinculados. A mesma regra é aplicada às alterações e

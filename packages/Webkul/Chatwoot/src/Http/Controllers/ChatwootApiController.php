@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Webkul\Activity\Repositories\ActivityRepository;
 use Webkul\Contact\Models\Person;
 use Webkul\Contact\Repositories\PersonRepository;
@@ -268,6 +270,118 @@ class ChatwootApiController extends Controller
             'created_at'  => $product->created_at,
             'updated_at'  => $product->updated_at,
         ])->values()]);
+    }
+
+    /**
+     * POST /api/v1/products ou POST /api/admin/products
+     * Cria um produto no catálogo do Krayin CRM.
+     */
+    public function createProduct(Request $request)
+    {
+        $this->authenticate($request);
+
+        $payload = $this->getPayload($request);
+        $validated = Validator::make($payload, $this->productRules())->validate();
+        $validated['entity_type'] = $validated['entity_type'] ?? 'products';
+        $validated['quantity'] = $validated['quantity'] ?? 0;
+        $validated['price'] = $validated['price'] ?? 0;
+
+        try {
+            $product = DB::transaction(fn () => $this->productRepository->create($validated));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produto criado com sucesso!',
+                'data'    => $this->serializeProduct((int) $product->id),
+                'id'      => $product->id,
+            ], 201);
+        } catch (\Throwable $e) {
+            Log::error('ChatwootApiController@createProduct failed.', [
+                'exception' => $e,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Não foi possível criar o produto.',
+            ], 500);
+        }
+    }
+
+    /**
+     * PUT /api/v1/products/{id} ou PUT /api/admin/products/{id}
+     * Atualiza um produto existente no catálogo do Krayin CRM.
+     */
+    public function updateProduct(Request $request, $id)
+    {
+        $this->authenticate($request);
+
+        $product = Product::query()->find($id);
+
+        if (! $product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Produto não encontrado.',
+            ], 404);
+        }
+
+        $payload = $this->getPayload($request);
+        $validated = Validator::make($payload, $this->productRules((int) $product->id))->validate();
+        $validated['entity_type'] = $validated['entity_type'] ?? 'products';
+
+        try {
+            $product = DB::transaction(fn () => $this->productRepository->update($validated, (int) $product->id));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produto atualizado com sucesso!',
+                'data'    => $this->serializeProduct((int) $product->id),
+                'id'      => $product->id,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('ChatwootApiController@updateProduct failed.', [
+                'product_id' => (int) $product->id,
+                'exception'  => $e,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Não foi possível atualizar o produto.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Validation rules shared by product creation and update.
+     */
+    private function productRules(?int $productId = null): array
+    {
+        return [
+            'name'        => ['required', 'string'],
+            'sku'         => ['required', 'string', Rule::unique('products', 'sku')->ignore($productId)],
+            'description' => ['nullable', 'string'],
+            'quantity'    => ['nullable', 'integer', 'min:0'],
+            'price'       => ['nullable', 'numeric', 'min:0'],
+            'entity_type' => ['sometimes', Rule::in(['products'])],
+        ];
+    }
+
+    /**
+     * Build a stable API payload without exposing custom attribute internals.
+     */
+    private function serializeProduct(int $productId): array
+    {
+        $product = Product::query()->with('attribute_values')->findOrFail($productId);
+
+        return [
+            'id'          => $product->id,
+            'name'        => $product->getAttribute('name'),
+            'sku'         => $product->getAttribute('sku'),
+            'description' => $product->getAttribute('description'),
+            'quantity'    => $product->getAttribute('quantity'),
+            'price'       => $product->getAttribute('price'),
+            'created_at'  => $product->created_at,
+            'updated_at'  => $product->updated_at,
+        ];
     }
 
     /**

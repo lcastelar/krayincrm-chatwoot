@@ -52,6 +52,8 @@ foreach (['api/v1' => 'v1', 'api/admin' => 'admin'] as $prefix => $tag) {
 
         // Products
         Route::get('/products', [ChatwootApiController::class, 'searchProducts'])->name("api.{$tag}.products.search");
+        Route::post('/products', [ChatwootApiController::class, 'createProduct'])->name("api.{$tag}.products.store");
+        Route::put('/products/{id}', [ChatwootApiController::class, 'updateProduct'])->name("api.{$tag}.products.update");
         Route::put('/leads/product/{id}', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.product.attach");
         Route::post('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.products.attach_post");
         Route::put('/leads/{id}/products', [ChatwootApiController::class, 'addLeadProduct'])->name("api.{$tag}.leads.products.attach_put");
