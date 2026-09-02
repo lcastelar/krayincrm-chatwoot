@@ -35,7 +35,11 @@ class ChatwootApiController extends Controller
         $token = $request->bearerToken() ?: $request->header('X-API-Key') ?: $request->query('api_token');
         $expected = config('chatwoot.krayin_api_token') ?: env('KRAYIN_API_TOKEN');
 
-        if (! empty($expected) && $token !== $expected) {
+        if (! is_string($expected)
+            || $expected === ''
+            || ! is_string($token)
+            || ! hash_equals($expected, $token)
+        ) {
             abort(response()->json(['error' => 'Unauthorized: Invalid or missing API token'], 401));
         }
     }

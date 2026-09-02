@@ -7,13 +7,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 $appRoot = getenv('KRAYIN_APP_ROOT') ?: dirname(__DIR__, 6);
+$testToken = 'regression-test-token';
+
+putenv('KRAYIN_API_TOKEN='.$testToken);
+$_ENV['KRAYIN_API_TOKEN'] = $testToken;
+$_SERVER['KRAYIN_API_TOKEN'] = $testToken;
 
 require $appRoot.'/vendor/autoload.php';
 $app = require $appRoot.'/bootstrap/app.php';
 $app->instance('request', Request::create('/'));
 $app->make(Kernel::class)->bootstrap();
 
-config(['chatwoot.krayin_api_token' => 'regression-test-token']);
+config(['chatwoot.krayin_api_token' => $testToken]);
+
+if (config('chatwoot.krayin_api_token') !== $testToken) {
+    throw new RuntimeException('Não foi possível preparar a configuração de autenticação do teste.');
+}
 
 $kernel = $app->make(Kernel::class);
 $request = static function (string $method, string $uri, array $payload = [], ?string $token = 'regression-test-token') use ($kernel) {
