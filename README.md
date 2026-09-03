@@ -61,6 +61,12 @@ Os addons são organizados como pacotes Laravel independentes em
 
 ## ⚡ Recursos atuais da integração
 
+### Relatórios e filtros
+
+O painel de relatórios permite aplicar período, funil e vendedor à visualização
+por meio da ação **Aplicar filtros**. As seleções permanecem visíveis após a
+atualização da página e também são encaminhadas à exportação CSV.
+
 ### API para automações (n8n)
 
 Autentique cada chamada com `Authorization: Bearer <token>`. Os exemplos usam

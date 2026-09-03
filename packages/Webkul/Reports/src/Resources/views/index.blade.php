@@ -68,15 +68,15 @@
 
                         <!-- Custom Dates Input -->
                         <div v-if="selectedPeriod === 'custom'" class="flex items-center gap-1.5">
-                            <input type="date" name="start_date" :value="filters.start_date" class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200" />
+                            <input type="date" name="start_date" v-model="selectedStartDate" class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200" />
                             <span class="text-xs text-gray-400">até</span>
-                            <input type="date" name="end_date" :value="filters.end_date" class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200" />
+                            <input type="date" name="end_date" v-model="selectedEndDate" class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200" />
                         </div>
 
                         <!-- Pipeline Filter -->
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">Funil:</label>
-                            <select name="pipeline_id" :value="filters.pipeline_id || ''" class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                            <select name="pipeline_id" v-model="selectedPipeline" class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
                                 <option value="">Todos os Funis</option>
                                 <option v-for="p in pipelines" :key="p.id" :value="p.id">@{{ p.name }}</option>
                             </select>
@@ -85,7 +85,7 @@
                         <!-- Sales Rep Filter -->
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">Vendedor:</label>
-                            <select name="user_id" :value="filters.user_id || ''" class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                            <select name="user_id" v-model="selectedUser" class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
                                 <option value="">Toda a Equipe</option>
                                 <option v-for="u in users" :key="u.id" :value="u.id">@{{ u.name }}</option>
                             </select>
@@ -93,10 +93,15 @@
 
                         <!-- Actions -->
                         <div class="flex items-center gap-2">
-                            <button type="submit" class="rounded-md bg-blue-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition">
-                                Filtrar
+                            <button
+                                type="submit"
+                                aria-label="Aplicar filtros ao relatório"
+                                class="inline-flex items-center rounded-md px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition"
+                                style="display: inline-flex; background-color: #2563eb; color: #ffffff;"
+                            >
+                                Aplicar filtros
                             </button>
-                            <a :href="exportUrl" class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                            <a :href="filteredExportUrl" class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
                                 <span class="icon-export text-sm"></span> Exportar CSV
                             </a>
                         </div>
@@ -580,12 +585,37 @@
                         activities: this.initialActivities || {},
                         activeTab: 'overview',
                         selectedPeriod: (this.initialFilters && this.initialFilters.period) || 'this_month',
+                        selectedStartDate: (this.initialFilters && this.initialFilters.start_date) || '',
+                        selectedEndDate: (this.initialFilters && this.initialFilters.end_date) || '',
+                        selectedPipeline: (this.initialFilters && this.initialFilters.pipeline_id) || '',
+                        selectedUser: (this.initialFilters && this.initialFilters.user_id) || '',
                         timelineChart: null,
                         revenueChart: null
                     };
                 },
 
                 computed: {
+                    filteredExportUrl() {
+                        const params = new URLSearchParams();
+
+                        params.set('period', this.selectedPeriod);
+
+                        if (this.selectedPeriod === 'custom') {
+                            params.set('start_date', this.selectedStartDate);
+                            params.set('end_date', this.selectedEndDate);
+                        }
+
+                        if (this.selectedPipeline) {
+                            params.set('pipeline_id', this.selectedPipeline);
+                        }
+
+                        if (this.selectedUser) {
+                            params.set('user_id', this.selectedUser);
+                        }
+
+                        return `${this.exportUrl}?${params.toString()}`;
+                    },
+
                     // Sequence: Open stages -> Lost stages -> Won stage (last)
                     activeFunnelStages() {
                         const rawStages = (this.funnel && this.funnel.stages) || [];
